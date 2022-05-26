@@ -1,0 +1,28 @@
+.justify-content-spacebetween {
+    justify-content: space-between !important;
+}
+
+.justify-content-end {
+    justify-content: flex-end !important;
+}
+
+.jg_floatChildButtonRight .cog-button {
+    float: right !important;
+}
+
+.jg_floatChildButtonLeft .cog-button {
+    float: left !important;
+}
+
+.cog-dialog .el-dialog {
+    opacity: 1 !important;
+}
+
+.cog-form, .cog-form > .cog-form__container {
+    max-width: 100% !important;
+    width: 100% !important;
+}
+
+.btn-width-100 .btn {
+    width: 100%;   
+}
