@@ -23,7 +23,7 @@ if [ ! -d "$PROGRAM_DIR" ]; then
         cd $PROGRAM_DIR;
 
         #CHECK FOR DEPENDENCIES
-        REQUIRED="inotify-tools software-properties-common python3 wget pip3";
+        REQUIRED="inotify-tools software-properties-common python3 wget python3-pip";
 
         printf "\n\nInstalling $REQUIRED\n";
         sudo apt-get --yes install $REQUIRED;
