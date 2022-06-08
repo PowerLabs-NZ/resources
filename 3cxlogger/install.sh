@@ -22,7 +22,6 @@ if [ ! -d "$PROGRAM_DIR" ]; then
         #MOVE TO WORKSPACE
         cd $PROGRAM_DIR;
 
-
         #Add repo
         echo "deb http://deb.debian.org/debian buster main" >> /etc/apt/sources.list
 
@@ -44,7 +43,9 @@ if [ ! -d "$PROGRAM_DIR" ]; then
 
         #Create Config
         printf "\n\n-----------------------------------------------------------------------\n";
-        echo "[3CX Logger]" >> "$PROGRAM_DIR\config.cfg"
+        touch $PROGRAM_DIR/config.cfg
+
+        echo "[3CX Logger]" >> "$PROGRAM_DIR/config.cfg"
 
         folderpath=NULL;
 
@@ -58,7 +59,7 @@ if [ ! -d "$PROGRAM_DIR" ]; then
             fi
         done
 
-        echo "cdrfolder = $folderpath" >> "$PROGRAM_DIR\config.cfg"
+        echo "cdrfolder = $folderpath" >> "$PROGRAM_DIR/config.cfg"
 
 
         orgid=NULL;
@@ -73,13 +74,13 @@ if [ ! -d "$PROGRAM_DIR" ]; then
             fi
         done
 
-        echo "orgid = $orgid" >> "$PROGRAM_DIR\config.cfg"
+        echo "orgid = $orgid" >> "$PROGRAM_DIR/config.cfg"
 
         #Add column map to config file
-        echo 'columnmap = {"historyid": 0,"callid": 1,"duration": 2,"timestart": 3,"timeanswered": 4,"timeend": 5,"reasonterminated": 6,"fromno": 7,"tono": 8,"fromdn": 9,"todn": 10,"dialno": 11,"reasonchanged": 12,"finalnumber": 13,"finaldn": 14,"billcode": 15,"billrate": 16,"billcost": 17,"billname": 18,"chain": 19,"fromtype": 20,"totype": 21,"finaltype": 22,"fromdispname": 23,"todispname": 24,"finaldispname": 25,"missedqueuecalls": 26,}' >> "$PROGRAM_DIR\config.cfg"
+        echo 'columnmap = {"historyid": 0,"callid": 1,"duration": 2,"timestart": 3,"timeanswered": 4,"timeend": 5,"reasonterminated": 6,"fromno": 7,"tono": 8,"fromdn": 9,"todn": 10,"dialno": 11,"reasonchanged": 12,"finalnumber": 13,"finaldn": 14,"billcode": 15,"billrate": 16,"billcost": 17,"billname": 18,"chain": 19,"fromtype": 20,"totype": 21,"finaltype": 22,"fromdispname": 23,"todispname": 24,"finaldispname": 25,"missedqueuecalls": 26}' >> "$PROGRAM_DIR/config.cfg"
 
         #Add endpoint to config file
-        echo 'endpoint = https://integration.powerlabs.co.nz/api/noauth/H8EDT3KA6TTU87PB66S3MPXV5Y5HUCVP/3cxcdr/' >> "$PROGRAM_DIR\config.cfg"
+        echo 'endpoint = https://integration.powerlabs.co.nz/api/noauth/H8EDT3KA6TTU87PB66S3MPXV5Y5HUCVP/3cxcdr/' >> "$PROGRAM_DIR/config.cfg"
 
         printf "\n\nInstalling service\n";
 

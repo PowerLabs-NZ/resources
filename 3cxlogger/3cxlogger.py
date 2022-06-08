@@ -188,7 +188,7 @@ def on_created(event):
 
 try:
     parser = configparser.RawConfigParser()
-    parser.read('.\config.cfg')
+    parser.read('/usr/bin/powerlabs_3cxlogger/config.cfg')
     pathtomonitor = parser.get('3CX Logger', 'cdrfolder')
     orgid = parser.get('3CX Logger', 'orgid')
     mapping = json.loads(parser.get('3CX Logger', 'columnmap'), object_hook=lambda d: SimpleNamespace(**d))
