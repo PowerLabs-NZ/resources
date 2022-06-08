@@ -23,7 +23,7 @@ if [ ! -d "$PROGRAM_DIR" ]; then
         cd $PROGRAM_DIR;
 
         #CHECK FOR DEPENDENCIES
-        REQUIRED="inotify-tools software-properties-common python3 wget python3-pip";
+        REQUIRED="software-properties-common python3 wget python3-pip";
 
         printf "\n\nInstalling $REQUIRED\n";
         sudo apt-get --yes install $REQUIRED;
@@ -37,6 +37,45 @@ if [ ! -d "$PROGRAM_DIR" ]; then
         #Download Python file
         wget https://cdn.jsdelivr.net/gh/PowerLabs-NZ/resources@release/3cxlogger/3cxlogger.service;
         wget https://cdn.jsdelivr.net/gh/PowerLabs-NZ/resources@release/3cxlogger/3cxlogger.py;
+
+        #Create Config
+        printf "\n\n-----------------------------------------------------------------------\n";
+        echo "[3CX Logger]" >> ".\config.cfg"
+
+        folderpath=NULL;
+
+        while [ ! -d $folderpath ]
+        do
+            printf "Please enter the full path of the 3CX call log folder\n";
+            read folderpath;
+
+            if [ ! -d $folderpath ]; then
+                printf "Folder not found\n\n";
+            fi
+        done
+
+        echo "cdrfolder = $folderpath" >> ".\config.cfg"
+
+
+        orgid=NULL;
+
+        while [[ ! $orgid =~ ^\{?[A-F0-9a-f]{8}-[A-F0-9a-f]{4}-[A-F0-9a-f]{4}-[A-F0-9a-f]{4}-[A-F0-9a-f]{12}\}?$ ]]
+        do
+            printf "Please enter the org id\n";
+            read orgid;
+
+            if [[ ! $orgid =~ ^\{?[A-F0-9a-f]{8}-[A-F0-9a-f]{4}-[A-F0-9a-f]{4}-[A-F0-9a-f]{4}-[A-F0-9a-f]{12}\}?$ ]]; then
+                printf "Org id not valid UUID\n\n";
+            fi
+        done
+
+        echo "orgid = $orgid" >> ".\config.cfg"
+
+        #Add column map to config file
+        echo 'columnmap = {"historyid": 0,"callid": 1,"duration": 2,"timestart": 3,"timeanswered": 4,"timeend": 5,"reasonterminated": 6,"fromno": 7,"tono": 8,"fromdn": 9,"todn": 10,"dialno": 11,"reasonchanged": 12,"finalnumber": 13,"finaldn": 14,"billcode": 15,"billrate": 16,"billcost": 17,"billname": 18,"chain": 19,"fromtype": 20,"totype": 21,"finaltype": 22,"fromdispname": 23,"todispname": 24,"finaldispname": 25,"missedqueuecalls": 26,}' >> ".\config.cfg"
+
+        #Add endpoint to config file
+        echo 'endpoint = https://integration.powerlabs.co.nz/api/noauth/H8EDT3KA6TTU87PB66S3MPXV5Y5HUCVP/3cxcdr/' >> ".\config.cfg"
 
         printf "\n\nInstalling service\n";
 
