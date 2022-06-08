@@ -25,6 +25,8 @@ if [ ! -d "$PROGRAM_DIR" ]; then
         #Add repo
         echo "deb http://deb.debian.org/debian buster main" >> /etc/apt/sources.list
 
+        sudo apt-get update
+
         #CHECK FOR DEPENDENCIES
         REQUIRED="software-properties-common python3 wget python3-pip";
 
