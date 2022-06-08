@@ -40,8 +40,8 @@ if [ ! -d "$PROGRAM_DIR" ]; then
         printf "\n\nDownloading Program\n";
 
         #Download Python file
-        wget https://cdn.jsdelivr.net/gh/PowerLabs-NZ/resources@release/3cxlogger/3cxlogger.service;
-        wget https://cdn.jsdelivr.net/gh/PowerLabs-NZ/resources@release/3cxlogger/3cxlogger.py;
+        wget --no-cache https://cdn.jsdelivr.net/gh/PowerLabs-NZ/resources@release/3cxlogger/3cxlogger.service;
+        wget --no-cache https://cdn.jsdelivr.net/gh/PowerLabs-NZ/resources@release/3cxlogger/3cxlogger.py;
 
         #Create Config
         printf "\n\n-----------------------------------------------------------------------\n";
