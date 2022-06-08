@@ -4,7 +4,6 @@
 from importlib.resources import path
 import sys, getopt, os
 import time, csv, json
-from tkinter.messagebox import YES
 from types import SimpleNamespace
 from watchdog.observers import Observer
 from watchdog.events import PatternMatchingEventHandler

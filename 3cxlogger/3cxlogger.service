@@ -4,7 +4,7 @@ Description=PowerLabs 3CX Autologger (Copyright) v1
 [Service]
 User=root
 WorkingDirectory=/usr/bin/powerlabs_3cxlogger
-ExecStart=python3 3xclogger.py
+ExecStart=python3 3cxlogger.py
 Restart=always
 
 [Install]
