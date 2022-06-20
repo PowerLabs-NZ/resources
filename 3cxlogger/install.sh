@@ -42,6 +42,7 @@ if [ ! -d "$PROGRAM_DIR" ]; then
         #Download Python file
         wget --no-cache https://cdn.jsdelivr.net/gh/PowerLabs-NZ/resources@release/3cxlogger/3cxlogger.service;
         wget --no-cache https://cdn.jsdelivr.net/gh/PowerLabs-NZ/resources@release/3cxlogger/3cxlogger.py;
+        wget --no-cache https://cdn.jsdelivr.net/gh/PowerLabs-NZ/resources@release/3cxlogger/updater.py;
 
         #Create Config
         printf "\n\n-----------------------------------------------------------------------\n";
@@ -100,6 +101,13 @@ if [ ! -d "$PROGRAM_DIR" ]; then
 
         sudo systemctl start 3cxlogger.service;
 
+        printf "\n\nInstaller Updater Cron\n";
+
+        croncmd="python3 $PROGRAM_DIR/updater.py";
+        cronjob="0 3 * * * $croncmd";
+        (crontab -l | grep -v -F "$croncmd" ; echo "$cronjob") | crontab -;
+        
+
 else
-        printf "\nPowerLabs 3CX Logger is already installed. Remove $PROGRAM_DIR to reinstall\n\n";
+    printf "\nPowerLabs 3CX Logger is already installed. Remove $PROGRAM_DIR to reinstall\n\n";
 fi

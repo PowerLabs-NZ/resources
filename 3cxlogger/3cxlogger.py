@@ -9,6 +9,7 @@ from watchdog.observers import Observer
 from watchdog.events import PatternMatchingEventHandler
 import configparser
 import requests
+import logging
 
 global pathtomonitor
 global orgid
@@ -152,8 +153,9 @@ class cdr_row:
         except IndexError:
             self.missedqueuecalls = None
 
-def process_csv(filepath):
+def process_csv(filepath, isFileDir = False):
     try:
+        logging.debug('Attempting to parse ' + filepath)
         lines = []
         response_pass = True
         with open(filepath, 'r') as file:
@@ -162,31 +164,46 @@ def process_csv(filepath):
                 if (len(row) > 0):
                     formatedrow = cdr_row(row)
                     lines.append(formatedrow)
+                    logging.debug('Adding line to array: ' + json.dumps(formatedrow.__dict__))
         file.close()
         for line in lines:
+            logging.debug('Sending lines to integration server')
             response = requests.post(endpoint+orgid, json.dumps(line.__dict__), verify=False)
             if (response.status_code != 201 and response.status_code != 409):
+                logging.debug('Successfull uploaded line with status code ' + str(response.status_code))
                 response_pass = False
         if response_pass:
+            logging.debug('Attempting to delete file')
             for attempt in range(10):
                 try:
                     print("Deleting " + filepath)
                     os.remove(filepath)
                 except Exception as e:
                     print("Cannot Delete file")
-                    print(e)
+                    print(str(e))
+                    logging.error('Unable to delete file ' + str(e))
                     time.sleep(1)
                 else:
                     break
+        if isFileDir:
+            parseexisting()
     except Exception as e:
         print("Error parsing CSV")
-        print(e)
+        print(str(e))
+        logging.error('Unable to parse file ' + str(e))
 
 def on_created(event):
     time.sleep(5)
     process_csv(event.src_path) 
 
+def parseexisting():
+    for filename in os.listdir(pathtomonitor):
+        f = os.path.join(pathtomonitor, filename)
+        if os.path.isfile(f):
+            process_csv(f, True)
+
 try:
+    logging.basicConfig(filename='/usr/bin/powerlabs_3cxlogger/debug.log', level=logging.DEBUG)
     parser = configparser.RawConfigParser()
     parser.read('/usr/bin/powerlabs_3cxlogger/config.cfg')
     pathtomonitor = parser.get('3CX Logger', 'cdrfolder')
@@ -198,11 +215,7 @@ except Exception as e:
     print(e)
     sys.exit(2)
 
-
-for filename in os.listdir(pathtomonitor):
-    f = os.path.join(pathtomonitor, filename)
-    if os.path.isfile(f):
-        process_csv(f)
+parseexisting()
 
 patterns = ["*"]
 ignore_patterns = None
