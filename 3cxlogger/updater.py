@@ -7,6 +7,7 @@ import shutil
 import sys
 import subprocess
 import requests
+import os
 
 try:
     logging.basicConfig(filename='/usr/bin/powerlabs_3cxlogger/updater.log', level=logging.NOTSET)
@@ -52,12 +53,23 @@ try:
         sys.exit(2)
 
     try:
-        subprocess.run("service 3cxlogger start", shell=True)
+        os.remove('/usr/bin/powerlabs_3cxlogger/debug.log')
     except Exception as e:
         print('Failed to start process')
         print(e)
         logging.error('Failed to start process ' + str(e))
         sys.exit(2)
+
+    try:
+        subprocess.run("service 3cxlogger start", shell=True)
+        os.remove('/usr/bin/powerlabs_3cxlogger/updater.log')
+    except Exception as e:
+        print('Failed to start process')
+        print(e)
+        logging.error('Failed to start process ' + str(e))
+        sys.exit(2)
+
+    
 
 except Exception as e:
     print('Failed to update file')
