@@ -193,7 +193,7 @@ def process_csv(filepath, isFileDir = False):
             print("Error parsing CSV")
             print(str(e))
             logging.error('Unable to parse file ' + str(e))
-            if str(e) == 'line contains NUL':
+            if str(e) == 'line contains NULL byte':
                 print("Replacing null values in file and rewriting out")
                 logging.error("Replacing null values in file and rewriting out")
                 fin = open(filepath, "rt")
