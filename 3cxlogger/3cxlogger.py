@@ -9,6 +9,7 @@ from watchdog.observers import Observer
 from watchdog.events import PatternMatchingEventHandler
 import configparser
 import requests
+from requests.packages.urllib3.exceptions import InsecureRequestWarning
 import logging
 
 global pathtomonitor
@@ -216,6 +217,7 @@ def parseexisting():
             process_csv(f, True)
 
 try:
+    requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
     logging.basicConfig(filename='/usr/bin/powerlabs_3cxlogger/debug.log', level=logging.ERROR)
     parser = configparser.RawConfigParser()
     parser.read('/usr/bin/powerlabs_3cxlogger/config.cfg')
