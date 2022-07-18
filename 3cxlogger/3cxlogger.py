@@ -216,7 +216,7 @@ def parseexisting():
             process_csv(f, True)
 
 try:
-    logging.basicConfig(filename='/usr/bin/powerlabs_3cxlogger/debug.log', level=logging.DEBUG)
+    logging.basicConfig(filename='/usr/bin/powerlabs_3cxlogger/debug.log', level=logging.ERROR)
     parser = configparser.RawConfigParser()
     parser.read('/usr/bin/powerlabs_3cxlogger/config.cfg')
     pathtomonitor = parser.get('3CX Logger', 'cdrfolder')
