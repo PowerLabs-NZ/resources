@@ -154,43 +154,56 @@ class cdr_row:
             self.missedqueuecalls = None
 
 def process_csv(filepath, isFileDir = False):
-    try:
-        logging.debug('Attempting to parse ' + filepath)
-        lines = []
-        response_pass = True
-        with open(filepath, 'r') as file:
-            reader = csv.reader(file)
-            for row in reader:
-                if (len(row) > 0):
-                    formatedrow = cdr_row(row)
-                    lines.append(formatedrow)
-                    logging.debug('Adding line to array: ' + json.dumps(formatedrow.__dict__))
-        file.close()
-        for line in lines:
-            logging.debug('Sending lines to integration server')
-            response = requests.post(endpoint+orgid, json.dumps(line.__dict__), verify=False)
-            if (response.status_code != 201 and response.status_code != 409):
-                logging.debug('Successfull uploaded line with status code ' + str(response.status_code))
-                response_pass = False
-        if response_pass:
-            logging.debug('Attempting to delete file')
-            for attempt in range(10):
-                try:
-                    print("Deleting " + filepath)
-                    os.remove(filepath)
-                except Exception as e:
-                    print("Cannot Delete file")
-                    print(str(e))
-                    logging.error('Unable to delete file ' + str(e))
-                    time.sleep(1)
-                else:
-                    break
-        if isFileDir:
-            parseexisting()
-    except Exception as e:
-        print("Error parsing CSV")
-        print(str(e))
-        logging.error('Unable to parse file ' + str(e))
+    while True:
+        try:
+            logging.debug('Attempting to parse ' + filepath)
+            lines = []
+            response_pass = True
+            with open(filepath, 'r') as file:
+                reader = csv.reader(file)
+                for row in reader:
+                    if (len(row) > 0):
+                        formatedrow = cdr_row(row)
+                        lines.append(formatedrow)
+                        logging.debug('Adding line to array: ' + json.dumps(formatedrow.__dict__))
+            file.close()
+            for line in lines:
+                logging.debug('Sending lines to integration server')
+                response = requests.post(endpoint+orgid, json.dumps(line.__dict__), verify=False)
+                if (response.status_code != 201 and response.status_code != 409):
+                    logging.debug('Successfull uploaded line with status code ' + str(response.status_code))
+                    response_pass = False
+            if response_pass:
+                logging.debug('Attempting to delete file')
+                for attempt in range(10):
+                    try:
+                        print("Deleting " + filepath)
+                        os.remove(filepath)
+                    except Exception as e:
+                        print("Cannot Delete file")
+                        print(str(e))
+                        logging.error('Unable to delete file ' + str(e))
+                        time.sleep(1)
+                    else:
+                        break
+            if isFileDir:
+                parseexisting()
+            break
+        except Exception as e:
+            print("Error parsing CSV")
+            print(str(e))
+            logging.error('Unable to parse file ' + str(e))
+            if str(e) == 'line contains NUL':
+                print("Replacing null values in file and rewriting out")
+                logging.error("Replacing null values in file and rewriting out")
+                fin = open(filepath, "rt")
+                data = fin.read()
+                data = data.replace('\x00', '')
+                fin.close()
+                fin = open(filepath, "wt")
+                fin.write(data)
+                fin.close()
+
 
 def on_created(event):
     time.sleep(5)
