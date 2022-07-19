@@ -216,7 +216,6 @@ def parseexisting():
             process_csv(f, True)
 
 try:
-    urllib3.disable_warnings()
     logging.basicConfig(filename='/usr/bin/powerlabs_3cxlogger/debug.log', level=logging.ERROR)
     parser = configparser.RawConfigParser()
     parser.read('/usr/bin/powerlabs_3cxlogger/config.cfg')
