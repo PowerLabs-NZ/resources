@@ -9,7 +9,6 @@ from watchdog.observers import Observer
 from watchdog.events import PatternMatchingEventHandler
 import configparser
 import requests
-from requests.packages.urllib3.exceptions import InsecureRequestWarning
 import logging
 
 global pathtomonitor
@@ -170,7 +169,7 @@ def process_csv(filepath, isFileDir = False):
             file.close()
             for line in lines:
                 logging.debug('Sending lines to integration server')
-                response = requests.post(endpoint+orgid, json.dumps(line.__dict__), verify=False)
+                response = requests.post(endpoint+orgid, json.dumps(line.__dict__))
                 if (response.status_code != 201 and response.status_code != 409):
                     logging.debug('Successfull uploaded line with status code ' + str(response.status_code))
                     response_pass = False
@@ -217,7 +216,7 @@ def parseexisting():
             process_csv(f, True)
 
 try:
-    requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
+    urllib3.disable_warnings()
     logging.basicConfig(filename='/usr/bin/powerlabs_3cxlogger/debug.log', level=logging.ERROR)
     parser = configparser.RawConfigParser()
     parser.read('/usr/bin/powerlabs_3cxlogger/config.cfg')
