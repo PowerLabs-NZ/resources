@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+from hashlib import sha256
 from importlib.resources import path
 import sys, getopt, os
 import time, csv, json
@@ -10,11 +11,16 @@ from watchdog.events import PatternMatchingEventHandler
 import configparser
 import requests
 import logging
+import platform
+import subprocess
 
 global pathtomonitor
 global orgid
 global mapping
 global endpoint
+global idhash
+
+global installdir
 
 class cdr_row:
     def __init__(self, rowarray):
@@ -153,9 +159,41 @@ class cdr_row:
         except IndexError:
             self.missedqueuecalls = None
 
+def getmachineid():
+    machineid = None
+    ostype = platform.system()
+    if (ostype == "Windows"):
+        process = subprocess.Popen('wmic csproduct get UUID', shell=True, stdout=subprocess.PIPE)
+        process.wait()
+        output = process.stdout.read().decode('utf-8').replace('\r','').strip()
+        machineid = output.split('\n')[1].strip()
+    elif (ostype == "Linux"):
+        process = subprocess.Popen('cat /etc/machine-id', shell=True, stdout=subprocess.PIPE)
+        process.wait()
+        machineid = process.stdout.read().decode('utf-8').strip()
+    return machineid
+
 def process_csv(filepath, isFileDir = False):
+    headers = {'x-3cxlogger-uploadkey': idhash, 'x-3cxlogger-orgid': orgid}
     while True:
         try:
+            Ready = False
+            while Ready == False:
+                response = requests.get(endpoint+"status", headers=headers)
+                if (response.status_code == 429):
+                    time.sleep(60)
+                elif (response.status_code == 200):
+                    Ready = True
+                elif (response.status_code == 401):
+                    print("Server unauthroised - Waiting for admin approval")
+                    logging.error("Server unauthroised - Waiting for admin approval")
+                    time.sleep(60)
+                elif (response.status_code == 403):
+                    logging.error("Server is not allowed to upload logs")
+                    print("Server is not allowed to upload logs")
+                    sys.exit(2)
+                else:
+                    logging.error("Failed to get status with status code" + str(response.status_code))
             logging.debug('Attempting to parse ' + filepath)
             lines = []
             response_pass = True
@@ -169,20 +207,39 @@ def process_csv(filepath, isFileDir = False):
             file.close()
             for line in lines:
                 logging.debug('Sending lines to integration server')
-                response = requests.post(endpoint+orgid, json.dumps(line.__dict__))
-                if (response.status_code != 201 and response.status_code != 409):
-                    logging.debug('Successfull uploaded line with status code ' + str(response.status_code))
-                    response_pass = False
+                uploaded = False
+                while uploaded == False:
+                    response = requests.post(endpoint+orgid, json.dumps(line.__dict__), headers=headers)
+                    if (response.status_code == 429):
+                        logging.debug(str(response.status_code) + " - Waiting for throttle")
+                        time.sleep(60)
+                    elif (response.status_code == 201 or response.status_code == 409):
+                        uploaded = True
+                        if (response.status_code == 201):
+                            logging.debug(str(response.status_code) + " - Uploaded")
+                        elif (response.status_code == 409):
+                            logging.debug(str(response.status_code) + " - Duplicate")
+                    elif (response.status_code == 401):
+                        logging.error("Server unauthroised - Waiting for admin approval")
+                        time.sleep(60)
+                    elif (response.status_code == 403):
+                        logging.error("Server is not allowed to upload logs")
+                        sys.exit(2)
+                    elif (response.status_code != 201 and response.status_code != 409):
+                        logging.debug('Failed to uploaded line with status code ' + str(response.status_code))
+                        response_pass = False
+
             if response_pass:
                 logging.debug('Attempting to delete file')
                 for attempt in range(10):
                     try:
-                        print("Deleting " + filepath)
+                        logging.debug("Deleting " + filepath)
                         os.remove(filepath)
                     except Exception as e:
                         print("Cannot Delete file")
                         print(str(e))
                         logging.error('Unable to delete file ' + str(e))
+                        print('Unable to delete file ' + str(e))
                         time.sleep(1)
                     else:
                         break
@@ -193,9 +250,11 @@ def process_csv(filepath, isFileDir = False):
             print("Error parsing CSV")
             print(str(e))
             logging.error('Unable to parse file ' + str(e))
-            if str(e) == 'line contains NULL byte':
+            print('Unable to parse file ' + str(e))
+            if str(e) == 'line contains NUL':
                 print("Replacing null values in file and rewriting out")
                 logging.error("Replacing null values in file and rewriting out")
+                print("Replacing null values in file and rewriting out")
                 fin = open(filepath, "rt")
                 data = fin.read()
                 data = data.replace('\x00', '')
@@ -216,13 +275,21 @@ def parseexisting():
             process_csv(f, True)
 
 try:
-    logging.basicConfig(filename='/usr/bin/powerlabs_3cxlogger/debug.log', level=logging.ERROR)
+    installdir = "/usr/bin/powerlabs_3cxlogger/"
+    logging.basicConfig(filename=installdir + '/debug.log', level=logging.ERROR)
     parser = configparser.RawConfigParser()
-    parser.read('/usr/bin/powerlabs_3cxlogger/config.cfg')
+    parser.read(installdir + '/config.cfg')
     pathtomonitor = parser.get('3CX Logger', 'cdrfolder')
     orgid = parser.get('3CX Logger', 'orgid')
     mapping = json.loads(parser.get('3CX Logger', 'columnmap'), object_hook=lambda d: SimpleNamespace(**d))
     endpoint = parser.get('3CX Logger', 'endpoint')
+    idhash = parser.get('3CX Logger', 'hashid', fallback="ERROR")
+    
+    if (idhash == "ERROR"):
+        idhash = sha256((orgid + getmachineid()).encode()).hexdigest()
+        parser.set('3CX Logger', 'hashid', idhash)
+        with open(installdir + '/config.cfg', 'w') as configfile:
+            parser.write(configfile)
 except Exception as e:
     print('Failed to load config file')
     print(e)
