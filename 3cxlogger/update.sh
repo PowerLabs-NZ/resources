@@ -23,10 +23,20 @@ sudo systemctl stop 3cxlogger.service;
 
 printf "\n\nDownloading Program\n";
 
+mkdir temp;
+
+cd ./temp;
+
 #Download Python file
-wget -o 3cxlogger.service --no-cache https://cdn.jsdelivr.net/gh/PowerLabs-NZ/resources@release/3cxlogger/3cxlogger.service;
-wget -o 3cxlogger.py --no-cache https://cdn.jsdelivr.net/gh/PowerLabs-NZ/resources@release/3cxlogger/3cxlogger.py;
-wget -o updater.py --no-cache https://cdn.jsdelivr.net/gh/PowerLabs-NZ/resources@release/3cxlogger/updater.py;
+wget --no-cache https://cdn.jsdelivr.net/gh/PowerLabs-NZ/resources@release/3cxlogger/3cxlogger.service;
+wget --no-cache https://cdn.jsdelivr.net/gh/PowerLabs-NZ/resources@release/3cxlogger/3cxlogger.py;
+wget --no-cache https://cdn.jsdelivr.net/gh/PowerLabs-NZ/resources@release/3cxlogger/updater.py;
+
+cd ..;
+
+cp ./temp/3cxlogger.service 3cxlogger.service
+cp ./temp/3cxlogger.py 3cxlogger.py
+cp ./temp/updater.py 3cxlogger.service
 
 sudo systemctl start 3cxlogger.service;
 
