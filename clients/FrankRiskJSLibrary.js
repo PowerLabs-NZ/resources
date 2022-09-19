@@ -88,9 +88,9 @@ var FrankRiskForms = (function() {
                     var navigationRow = $('<div class="cog-row jg_navigation"></div>');
 
                     //If Save Button Exists copy to top
-                    if (cogpage.find('.cog-page__navigation .cog-button--save').length != 0) {
+                    if (cogpage.find('.cog-page__navigation .cog-button--save:visible').length != 0) {
                         //Clone Existing Save Button
-                        var saveButton = cogpage.find('div.cog-page__navigation button.cog-button--save').clone();
+                        var saveButton = cogpage.find('div.cog-page__navigation button.cog-button--save:visible').clone();
 
                         //Clone the template button for reset function
                         var resetButton = saveButton.clone();
@@ -111,7 +111,7 @@ var FrankRiskForms = (function() {
 
                         //When our save button is clicked just mimic clicking the save button at the bottom
                         saveButton.on('click', function() {
-                            $('div.cog-form__container div.cog-page'+page+' div.cog-page__navigation button.cog-button--save').click();
+                            $('div.cog-form__container div.cog-page'+page+' div.cog-page__navigation button.cog-button--save:visible').click();
                         });
 
                         //append the save and reset buttons to the container
@@ -125,19 +125,19 @@ var FrankRiskForms = (function() {
                     if (cogpage.find('.cog-page-progress').length == 0) {
                         var buttons = [];
 
-                        if(cogpage.find('.cog-page__navigation .cog-button--navigation.cog-button--next').length != 0) {
-                            var nextButton = cogpage.find('.cog-page__navigation .cog-button--navigation.cog-button--next').clone();
+                        if(cogpage.find('.cog-page__navigation .cog-button--navigation.cog-button--next:visible').length != 0) {
+                            var nextButton = cogpage.find('.cog-page__navigation .cog-button--navigation.cog-button--next:visible').clone();
                             nextButton.on('click', function() {
-                                $('div.cog-form__container div.cog-page'+page+' div.cog-page__navigation .cog-button--navigation.cog-button--next').click();
+                                $('div.cog-form__container div.cog-page'+page+' div.cog-page__navigation .cog-button--navigation.cog-button--next:visible').click();
                             });
                             nextButton.css('margin', '0 1rem');
                             buttons.push(nextButton);
                         }
 
-                        if(cogpage.find('.cog-page__navigation .cog-button--navigation.cog-button--back').length != 0) {
-                            var backButton = cogpage.find('.cog-page__navigation .cog-button--navigation.cog-button--back').clone();
+                        if(cogpage.find('.cog-page__navigation .cog-button--navigation.cog-button--back:visible').length != 0) {
+                            var backButton = cogpage.find('.cog-page__navigation .cog-button--navigation.cog-button--back:visible').clone();
                             backButton.on('click', function() {
-                                $('div.cog-form__container div.cog-page'+page+' div.cog-page__navigation .cog-button--navigation.cog-button--back').click();
+                                $('div.cog-form__container div.cog-page'+page+' div.cog-page__navigation .cog-button--navigation.cog-button--back:visible').click();
                             });
                             backButton.css('margin', '0 1rem');
                             buttons.push(backButton);
