@@ -199,6 +199,10 @@ var FrankRiskForms = (function() {
         document.getElementsByTagName('head')[0].append(scriptLoad);
         restrictNavigate = false;
 
+        if (window.location.hash) {
+            restrictNavigate = true;
+        }
+
         WaitForCognito(function(){
             if (typeof Cognito !== 'undefined') {
                 formContext = Cognito.mount(formNumber, element);
@@ -207,10 +211,6 @@ var FrankRiskForms = (function() {
                     addButtons();
                 });
                 
-                if (window.location.hash && $('.cog-form__container .cog-form__content .cog-page-progress.cog-page-progress--steps:visible').length > 0) {
-                    restrictNavigate = true;
-                }
-
                 function addButtons(page = "") {
                     var cogpage = $('.cog-form__container .cog-body div.cog-page'+page);
 
