@@ -207,6 +207,10 @@ var FrankRiskForms = (function() {
                     addButtons();
                 });
                 
+                if (window.location.hash && $('.cog-form__container .cog-form__content .cog-page-progress.cog-page-progress--steps:visible').length > 0) {
+                    restrictNavigate = true;
+                }
+
                 function addButtons(page = "") {
                     var cogpage = $('.cog-form__container .cog-body div.cog-page'+page);
 
@@ -266,7 +270,7 @@ var FrankRiskForms = (function() {
                             navButtons.prepend(buttons[i]);
                         }
 
-                        restrictNavigate = true;
+                        
 
                         navigationRow.prepend(navButtons);
                     }
@@ -289,7 +293,7 @@ var FrankRiskForms = (function() {
                 });
 
                 formContext.on('beforeNavigate', function(event) {
-                    if (window.location.hash && restrictNavigate) {
+                    if (restrictNavigate) {
                         event.preventDefault();
                         restrictNavigate = false;
                     }
