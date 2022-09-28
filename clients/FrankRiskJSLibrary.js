@@ -197,6 +197,7 @@ var FrankRiskForms = (function() {
         scriptLoad.setAttribute('data-key', formID);
         scriptLoad.setAttribute('data-form', formNumber);
         document.getElementsByTagName('head')[0].append(scriptLoad);
+        restrictNavigate = false;
 
         WaitForCognito(function(){
             if (typeof Cognito !== 'undefined') {
@@ -264,6 +265,8 @@ var FrankRiskForms = (function() {
                         for (var i = 0; i < buttons.length; i++) {
                             navButtons.prepend(buttons[i]);
                         }
+
+                        restrictNavigate = true;
 
                         navigationRow.prepend(navButtons);
                     }
