@@ -175,93 +175,89 @@ def getmachineid():
 
 def process_csv(filepath, isFileDir = False):
     headers = {'x-3cxlogger-uploadkey': idhash, 'x-3cxlogger-orgid': orgid}
-    while True:
-        try:
-            Ready = False
-            while Ready == False:
-                response = requests.get(endpoint+"status", headers=headers)
+    try:
+        Ready = False
+        while Ready == False:
+            response = requests.get(endpoint+"status", headers=headers)
+            if (response.status_code == 429):
+                time.sleep(60)
+            elif (response.status_code == 200):
+                Ready = True
+            elif (response.status_code == 401):
+                print("Server unauthroised - Waiting for admin approval")
+                logging.error("Server unauthroised - Waiting for admin approval")
+                time.sleep(60)
+            elif (response.status_code == 403):
+                logging.error("Server is not allowed to upload logs")
+                print("Server is not allowed to upload logs")
+                sys.exit(2)
+            else:
+                logging.error("Failed to get status with status code" + str(response.status_code))
+        logging.debug('Attempting to parse ' + filepath)
+        lines = []
+        response_pass = True
+        with open(filepath, 'r') as file:
+            reader = csv.reader(file)
+            for row in reader:
+                if (len(row) > 0):
+                    formatedrow = cdr_row(row)
+                    lines.append(formatedrow)
+                    logging.debug('Adding line to array: ' + json.dumps(formatedrow.__dict__))
+        file.close()
+        for line in lines:
+            logging.debug('Sending lines to integration server')
+            uploaded = False
+            while uploaded == False:
+                response = requests.post(endpoint+orgid, json.dumps(line.__dict__), headers=headers)
                 if (response.status_code == 429):
+                    logging.debug(str(response.status_code) + " - Waiting for throttle")
                     time.sleep(60)
-                elif (response.status_code == 200):
-                    Ready = True
+                elif (response.status_code == 201 or response.status_code == 409):
+                    uploaded = True
+                    if (response.status_code == 201):
+                        logging.debug(str(response.status_code) + " - Uploaded")
+                    elif (response.status_code == 409):
+                        logging.debug(str(response.status_code) + " - Duplicate")
                 elif (response.status_code == 401):
-                    print("Server unauthroised - Waiting for admin approval")
                     logging.error("Server unauthroised - Waiting for admin approval")
                     time.sleep(60)
                 elif (response.status_code == 403):
                     logging.error("Server is not allowed to upload logs")
-                    print("Server is not allowed to upload logs")
                     sys.exit(2)
-                else:
-                    logging.error("Failed to get status with status code" + str(response.status_code))
-            logging.debug('Attempting to parse ' + filepath)
-            lines = []
-            response_pass = True
-            with open(filepath, 'r') as file:
-                reader = csv.reader(file)
-                for row in reader:
-                    if (len(row) > 0):
-                        formatedrow = cdr_row(row)
-                        lines.append(formatedrow)
-                        logging.debug('Adding line to array: ' + json.dumps(formatedrow.__dict__))
-            file.close()
-            for line in lines:
-                logging.debug('Sending lines to integration server')
-                uploaded = False
-                while uploaded == False:
-                    response = requests.post(endpoint+orgid, json.dumps(line.__dict__), headers=headers)
-                    if (response.status_code == 429):
-                        logging.debug(str(response.status_code) + " - Waiting for throttle")
-                        time.sleep(60)
-                    elif (response.status_code == 201 or response.status_code == 409):
-                        uploaded = True
-                        if (response.status_code == 201):
-                            logging.debug(str(response.status_code) + " - Uploaded")
-                        elif (response.status_code == 409):
-                            logging.debug(str(response.status_code) + " - Duplicate")
-                    elif (response.status_code == 401):
-                        logging.error("Server unauthroised - Waiting for admin approval")
-                        time.sleep(60)
-                    elif (response.status_code == 403):
-                        logging.error("Server is not allowed to upload logs")
-                        sys.exit(2)
-                    elif (response.status_code != 201 and response.status_code != 409):
-                        logging.debug('Failed to uploaded line with status code ' + str(response.status_code))
-                        response_pass = False
+                elif (response.status_code != 201 and response.status_code != 409):
+                    logging.debug('Failed to uploaded line with status code ' + str(response.status_code))
+                    response_pass = False
 
-            if response_pass:
-                logging.debug('Attempting to delete file')
-                for attempt in range(10):
-                    try:
-                        logging.debug("Deleting " + filepath)
-                        os.remove(filepath)
-                    except Exception as e:
-                        print("Cannot Delete file")
-                        print(str(e))
-                        logging.error('Unable to delete file ' + str(e))
-                        print('Unable to delete file ' + str(e))
-                        time.sleep(1)
-                    else:
-                        break
-            if isFileDir:
-                parseexisting()
-            break
-        except Exception as e:
-            print("Error parsing CSV")
-            print(str(e))
-            logging.error('Unable to parse file ' + str(e))
-            print('Unable to parse file ' + str(e))
-            if str(e) == 'line contains NUL':
-                print("Replacing null values in file and rewriting out")
-                logging.error("Replacing null values in file and rewriting out")
-                print("Replacing null values in file and rewriting out")
-                fin = open(filepath, "rt")
-                data = fin.read()
-                data = data.replace('\x00', '')
-                fin.close()
-                fin = open(filepath, "wt")
-                fin.write(data)
-                fin.close()
+        if response_pass:
+            logging.debug('Attempting to delete file')
+            for attempt in range(10):
+                try:
+                    logging.debug("Deleting " + filepath)
+                    os.remove(filepath)
+                except Exception as e:
+                    print("Cannot Delete file")
+                    print(str(e))
+                    logging.error('Unable to delete file ' + str(e))
+                    print('Unable to delete file ' + str(e))
+                    time.sleep(1)
+                else:
+                    break
+    except Exception as e:
+        print("Error parsing CSV")
+        print(str(e))
+        logging.error('Unable to parse file ' + str(e))
+        print('Unable to parse file ' + str(e))
+        if str(e) == 'line contains NUL':
+            print("Replacing null values in file and rewriting out")
+            logging.error("Replacing null values in file and rewriting out")
+            print("Replacing null values in file and rewriting out")
+            fin = open(filepath, "rt")
+            data = fin.read()
+            data = data.replace('\x00', '')
+            fin.close()
+            fin = open(filepath, "wt")
+            fin.write(data)
+            fin.close()
 
 
 def on_created(event):
