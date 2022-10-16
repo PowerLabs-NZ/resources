@@ -28,9 +28,9 @@ mkdir temp;
 cd ./temp;
 
 #Download Python file
-wget --no-cache https://cdn.jsdelivr.net/gh/PowerLabs-NZ/resources@release/3cxlogger/3cxlogger.service;
-wget --no-cache https://cdn.jsdelivr.net/gh/PowerLabs-NZ/resources@release/3cxlogger/3cxlogger.py;
-wget --no-cache https://cdn.jsdelivr.net/gh/PowerLabs-NZ/resources@release/3cxlogger/updater.py;
+curl -o 3cxlogger.service -H 'Cache-Control: no-cache, no-store' https://cdn.jsdelivr.net/gh/PowerLabs-NZ/resources@release/3cxlogger/3cxlogger.service;
+curl -o 3cxlogger.py -H 'Cache-Control: no-cache, no-store' https://cdn.jsdelivr.net/gh/PowerLabs-NZ/resources@release/3cxlogger/3cxlogger.py;
+curl -o updater.py -H 'Cache-Control: no-cache, no-store' https://cdn.jsdelivr.net/gh/PowerLabs-NZ/resources@release/3cxlogger/updater.py;
 
 cd ..;
 

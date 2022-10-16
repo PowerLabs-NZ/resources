@@ -28,7 +28,7 @@ if [ ! -d "$PROGRAM_DIR" ]; then
         sudo apt-get update
 
         #CHECK FOR DEPENDENCIES
-        REQUIRED="software-properties-common python3 wget python3-pip";
+        REQUIRED="software-properties-common python3 curl python3-pip";
 
         printf "\n\nInstalling $REQUIRED\n";
         sudo apt-get --yes install $REQUIRED;
@@ -40,9 +40,9 @@ if [ ! -d "$PROGRAM_DIR" ]; then
         printf "\n\nDownloading Program\n";
 
         #Download Python file
-        wget --no-cache https://cdn.jsdelivr.net/gh/PowerLabs-NZ/resources@release/3cxlogger/3cxlogger.service;
-        wget --no-cache https://cdn.jsdelivr.net/gh/PowerLabs-NZ/resources@release/3cxlogger/3cxlogger.py;
-        wget --no-cache https://cdn.jsdelivr.net/gh/PowerLabs-NZ/resources@release/3cxlogger/updater.py;
+        curl -o 3cxlogger.service -H 'Cache-Control: no-cache, no-store' https://cdn.jsdelivr.net/gh/PowerLabs-NZ/resources@release/3cxlogger/3cxlogger.service;
+        curl -o 3cxlogger.py -H 'Cache-Control: no-cache, no-store' https://cdn.jsdelivr.net/gh/PowerLabs-NZ/resources@release/3cxlogger/3cxlogger.py;
+        curl -o updater.py -H 'Cache-Control: no-cache, no-store' https://cdn.jsdelivr.net/gh/PowerLabs-NZ/resources@release/3cxlogger/updater.py;
 
         #Create Config
         printf "\n\n-----------------------------------------------------------------------\n";
