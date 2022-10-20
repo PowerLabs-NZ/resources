@@ -1,4 +1,4 @@
-//Copyright JG Software Solutions Limited
+//Copyright PowerLabs
 
 $(function(){
     "use strict";
@@ -7,7 +7,7 @@ $(function(){
     });
 });
 
-function jg_formatDate(date) {
+function pl_formatDate(date) {
     "use strict";
     var d = new Date(date),
     month = '' + (d.getMonth() + 1),
@@ -19,7 +19,7 @@ function jg_formatDate(date) {
         day = '0' + day;
     return [year, month, day].join('-');
 }
-function jg_createData(organizationURI, url, data, callback) {
+function pl_createData(organizationURI, url, data, callback) {
     "use strict";
     $.ajax({
         type: "POST",
@@ -39,7 +39,7 @@ function jg_createData(organizationURI, url, data, callback) {
         }
     });
 }
-function jg_updateData(organizationURI, url, data, callback) {
+function pl_updateData(organizationURI, url, data, callback) {
     "use strict";
     $.ajax({
         type: "PATCH",
@@ -60,7 +60,7 @@ function jg_updateData(organizationURI, url, data, callback) {
         }
     });
 }
-function jg_retrieveData(organizationURI, url, callback) {
+function pl_retrieveData(organizationURI, url, callback) {
     "use strict";
     $.ajax({
         type: "GET",
@@ -76,7 +76,7 @@ function jg_retrieveData(organizationURI, url, callback) {
         }
     });
 }
-function jg_deleteData(organizationURI, url, callback) {
+function pl_deleteData(organizationURI, url, callback) {
     "use strict";
     $.ajax({
         type: "DELETE",
@@ -92,7 +92,7 @@ function jg_deleteData(organizationURI, url, callback) {
         }
     });
 }
-function jg_getOptionSet(organizationURI, entity, attributeID, callback) {
+function pl_getOptionSet(organizationURI, entity, attributeID, callback) {
     "use strict";
     var url = "EntityDefinitions(LogicalName='"+entity+"')/Attributes("+attributeID+")/Microsoft.Dynamics.CRM.PicklistAttributeMetadata/OptionSet";
     var optionset = {
@@ -102,7 +102,7 @@ function jg_getOptionSet(organizationURI, entity, attributeID, callback) {
         options: []
     };
 
-    jg_retrieveData(organizationURI, url, function(data) {
+    pl_retrieveData(organizationURI, url, function(data) {
         if(data) {
             optionset.isGlobal = data.IsGlobal;
             optionset.name = data.Name;
@@ -123,7 +123,7 @@ function jg_getOptionSet(organizationURI, entity, attributeID, callback) {
     });
 }
 
-function jg_getMultiOptionSet(organizationURI, entity, attributeID, callback) {
+function pl_getMultiOptionSet(organizationURI, entity, attributeID, callback) {
     "use strict";
     var url = "EntityDefinitions(LogicalName='"+entity+"')/Attributes("+attributeID+")/Microsoft.Dynamics.CRM.MultiSelectPicklistAttributeMetadata/OptionSet";
     var optionset = {
@@ -133,7 +133,7 @@ function jg_getMultiOptionSet(organizationURI, entity, attributeID, callback) {
         options: []
     };
 
-    jg_retrieveData(organizationURI, url, function(data) {
+    pl_retrieveData(organizationURI, url, function(data) {
         if(data) {
             optionset.isGlobal = data.IsGlobal;
             optionset.name = data.Name;
