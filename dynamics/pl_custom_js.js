@@ -16,6 +16,7 @@ function pl_getentity_guid(primaryControl) {
     entityid = primaryControl.entityReference.id;
     entityid = entityid.replace("{", "");
     entityid = entityid.replace("}", "");
+    return entityid;
 }
 
 function pl_getentity_uri(primaryControl) {
