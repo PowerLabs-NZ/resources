@@ -13,16 +13,16 @@ function pl_custom_loaded() {
 }
 
 function pl_getentity_guid(primaryControl) {
-    entityid = primaryControl.entityReference.id;
+    var entityid = primaryControl.entityReference.id;
     entityid = entityid.replace("{", "");
     entityid = entityid.replace("}", "");
     return entityid;
 }
 
 function pl_getentity_uri(primaryControl) {
-    entityid = pl_getentity_guid(primaryControl);
-    entitytype = primaryControl.entityReference.entityType;
-    return entityType + "('" + entityid + "')"
+    var entityid = pl_getentity_guid(primaryControl);
+    var entitytype = primaryControl.entityReference.entityType;
+    return entitytype + "('" + entityid + "')"
 }
 
 function pl_formatDate(date) {
