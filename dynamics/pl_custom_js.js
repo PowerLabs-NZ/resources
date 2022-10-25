@@ -7,6 +7,11 @@ $(function(){
     });
 });
 
+function pl_custom_loaded() {
+    console.log("PL Custom JS Loaded")
+    return true;
+}
+
 function pl_formatDate(date) {
     "use strict";
     var d = new Date(date),
