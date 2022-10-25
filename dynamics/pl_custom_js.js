@@ -12,6 +12,18 @@ function pl_custom_loaded() {
     return true;
 }
 
+function pl_getentity_guid(primaryControl) {
+    entityid = primaryControl.entityReference.id;
+    entityid = entityid.replace("{", "");
+    entityid = entityid.replace("}", "");
+}
+
+function pl_getentity_uri(primaryControl) {
+    entityid = pl_getentity_guid(primaryControl);
+    entitytype = primaryControl.entityReference.entityType;
+    return entityType + "('" + entityid + "')"
+}
+
 function pl_formatDate(date) {
     "use strict";
     var d = new Date(date),
