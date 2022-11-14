@@ -77,7 +77,7 @@ var FrankRiskForms = (function() {
                         console.log(formContext);
                         formContext.on('ready', function(event) {     
                             console.log("Form Fully Loaded");
-                            addButtons();
+                            //addButtons();
                         });
                         
                         function addButtons(page = "") {
@@ -169,7 +169,7 @@ var FrankRiskForms = (function() {
                         
                         formContext.on('afterNavigate', function(event) {
                             var filter = '[data-page="'+event.data.destinationPage.number+'"]';
-                            addButtons(filter);
+                            //addButtons(filter);
                         });
         
                         if (saveURL != null && saveURL != "" && saveURL != "null" && saveURL != undefined) {
@@ -203,7 +203,7 @@ var FrankRiskForms = (function() {
                 formContext = Cognito.mount(formNumber, element);
                 formContext.on('ready', function(event) {     
                     console.log("Form Fully Loaded");
-                    addButtons();
+                    //addButtons();
                 });
                 
                 function addButtons(page = "") {
@@ -284,7 +284,7 @@ var FrankRiskForms = (function() {
                 
                 formContext.on('afterNavigate', function(event) {
                     var filter = '[data-page="'+event.data.destinationPage.number+'"]';
-                    addButtons(filter);
+                    //addButtons(filter);
                 });
 
                 if (saveURL != null && saveURL != "" && saveURL != "null" && saveURL != undefined) {
