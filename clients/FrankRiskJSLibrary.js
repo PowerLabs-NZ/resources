@@ -197,11 +197,6 @@ var FrankRiskForms = (function() {
         scriptLoad.setAttribute('data-key', formID);
         scriptLoad.setAttribute('data-form', formNumber);
         document.getElementsByTagName('head')[0].append(scriptLoad);
-        restrictNavigate = false;
-
-        if (window.location.hash) {
-            restrictNavigate = true;
-        }
 
         WaitForCognito(function(){
             if (typeof Cognito !== 'undefined') {
@@ -290,13 +285,6 @@ var FrankRiskForms = (function() {
                 formContext.on('afterNavigate', function(event) {
                     var filter = '[data-page="'+event.data.destinationPage.number+'"]';
                     addButtons(filter);
-                });
-
-                formContext.on('beforeNavigate', function(event) {
-                    if (restrictNavigate) {
-                        event.preventDefault();
-                        restrictNavigate = false;
-                    }
                 });
 
                 if (saveURL != null && saveURL != "" && saveURL != "null" && saveURL != undefined) {
