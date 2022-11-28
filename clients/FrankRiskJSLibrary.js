@@ -28,16 +28,16 @@ var FrankRiskForms = (function() {
     var version = new Date().getTime();
 
     var jquery = document.createElement("script");
-    jquery.src = "https://cdn.jsdelivr.net/gh/JG-Software-Solutions/javascript_libraries@release/jquery-3.6.0.js?v="+version;
+    jquery.src = "https://cdn.jsdelivr.net/gh/PowerLabs-NZ/resources@release/global/jquery-3.6.0.js?v="+version;
     document.getElementsByTagName('head')[0].appendChild(jquery);
 
     var bootstrapjs = document.createElement("script");
-    bootstrapjs.src = "https://cdn.jsdelivr.net/gh/JG-Software-Solutions/javascript_libraries@release/jg_bootstrap.bundle.js?v="+version;
+    bootstrapjs.src = "https://cdn.jsdelivr.net/gh/PowerLabs-NZ/resources@release/global/jg_bootstrap.bundle.js?v="+version;
     document.getElementsByTagName('head')[0].appendChild(bootstrapjs);
 
     var bootstrapcss = document.createElement("link");
     bootstrapcss.rel = "stylesheet";
-    bootstrapcss.href = "https://cdn.jsdelivr.net/gh/JG-Software-Solutions/javascript_libraries@release/jg_bootstrap.css?v="+version;
+    bootstrapcss.href = "https://cdn.jsdelivr.net/gh/PowerLabs-NZ/resources@release/global/jg_bootstrap.css?v="+version;
     bootstrapcss.crossorigin = "anonymous";
     bootstrapcss.setAttribute("type", "text/css");
     document.getElementsByTagName('head')[0].appendChild(bootstrapcss);
@@ -51,7 +51,7 @@ var FrankRiskForms = (function() {
 
     var customcss = document.createElement("link");
     customcss.rel = "stylesheet";
-    customcss.href = "https://cdn.jsdelivr.net/gh/JG-Software-Solutions/javascript_libraries@release/FrankRisk.css?v="+version;
+    customcss.href = "https://cdn.jsdelivr.net/gh/PowerLabs-NZ/resources@release/clients/FrankRiskJSLibrary.css?v="+version;
     customcss.crossorigin = "anonymous";
     customcss.setAttribute("type", "text/css");
     document.getElementsByTagName('head')[0].appendChild(customcss);
