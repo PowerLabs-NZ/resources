@@ -51,7 +51,7 @@ var FrankRiskForms = (function() {
 
     var customcss = document.createElement("link");
     customcss.rel = "stylesheet";
-    customcss.href = "https://cdn.jsdelivr.net/gh/PowerLabs-NZ/resources@release/clients/FrankRiskJSLibrary.css?v="+version;
+    customcss.href = "https://cdn.jsdelivr.net/gh/PowerLabs-NZ/resources@release/clients/FrankRisk.css?v="+version;
     customcss.crossorigin = "anonymous";
     customcss.setAttribute("type", "text/css");
     document.getElementsByTagName('head')[0].appendChild(customcss);
