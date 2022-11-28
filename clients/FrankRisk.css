@@ -23,6 +23,34 @@
     width: 100% !important;
 }
 
-.btn-width-100 .btn {
-    width: 100%;   
+a.pl_buttonprimary {
+    width: 80%;
+    height: 100%;
+}
+
+a.pl_buttonsecondary {
+    width: auto;
+    height: auto;
+}
+
+span.pl_primarysecondarybuttons {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+}
+
+span.pl_primarysecondarybuttons .pl_buttonprimary {
+    border-right: none;
+    border-radius: 5px 0px 0px 5px;
+    align-items: center;
+    display: flex;
+    justify-content: center;
+}
+
+span.pl_primarysecondarybuttons .pl_buttonsecondary {
+    border-right: none;
+    border-radius: 0px 5px 5px 0px;
+    align-items: center;
+    display: flex;
+    justify-content: center;
 }

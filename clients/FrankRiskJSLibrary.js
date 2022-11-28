@@ -25,29 +25,36 @@
 
 var FrankRiskForms = (function() {
     var methods = {};
-
-    var script = document.createElement("script");
     var version = new Date().getTime();
-    script.src = "https://cdn.jsdelivr.net/gh/JG-Software-Solutions/javascript_libraries@release/jquery-3.6.0.js?v="+version;
-    document.getElementsByTagName('head')[0].appendChild(script);
 
-    var script = document.createElement("script");
-    var version = new Date().getTime();
-    script.src = "https://cdn.jsdelivr.net/gh/JG-Software-Solutions/javascript_libraries@release/jg_bootstrap.bundle.js?v="+version;
-    document.getElementsByTagName('head')[0].appendChild(script);
+    var jquery = document.createElement("script");
+    jquery.src = "https://cdn.jsdelivr.net/gh/JG-Software-Solutions/javascript_libraries@release/jquery-3.6.0.js?v="+version;
+    document.getElementsByTagName('head')[0].appendChild(jquery);
 
-    var link = document.createElement("link");
-    link.rel = "stylesheet";
-    link.href = "https://cdn.jsdelivr.net/gh/JG-Software-Solutions/javascript_libraries@release/jg_bootstrap.css?v="+version;
-    link.crossorigin = "anonymous";
-    document.getElementsByTagName('head')[0].appendChild(link);
+    var bootstrapjs = document.createElement("script");
+    bootstrapjs.src = "https://cdn.jsdelivr.net/gh/JG-Software-Solutions/javascript_libraries@release/jg_bootstrap.bundle.js?v="+version;
+    document.getElementsByTagName('head')[0].appendChild(bootstrapjs);
 
-    var link = document.createElement("link");
-    link.rel = "stylesheet";
-    link.href = "https://cdn.jsdelivr.net/gh/JG-Software-Solutions/javascript_libraries@release/FrankRisk.css?v="+version;
-    link.crossorigin = "anonymous";
-    document.getElementsByTagName('head')[0].appendChild(link);
+    var bootstrapcss = document.createElement("link");
+    bootstrapcss.rel = "stylesheet";
+    bootstrapcss.href = "https://cdn.jsdelivr.net/gh/JG-Software-Solutions/javascript_libraries@release/jg_bootstrap.css?v="+version;
+    bootstrapcss.crossorigin = "anonymous";
+    bootstrapcss.setAttribute("type", "text/css");
+    document.getElementsByTagName('head')[0].appendChild(bootstrapcss);
 
+    var fontawesome = document.createElement("link");
+    fontawesome.rel = "stylesheet";
+    fontawesome.href = "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.1/css/all.min.css";
+    fontawesome.crossorigin = "anonymous";
+    fontawesome.setAttribute("type", "text/css");
+    document.getElementsByTagName('head')[0].appendChild(fontawesome);
+
+    var customcss = document.createElement("link");
+    customcss.rel = "stylesheet";
+    customcss.href = "https://cdn.jsdelivr.net/gh/JG-Software-Solutions/javascript_libraries@release/FrankRisk.css?v="+version;
+    customcss.crossorigin = "anonymous";
+    customcss.setAttribute("type", "text/css");
+    document.getElementsByTagName('head')[0].appendChild(customcss);
     
 
     /*<script>
@@ -321,15 +328,32 @@ var FrankRiskForms = (function() {
         var row = $('<div class="btn-width-100 jg_bs row g-5 mx-5 text-center"></div>');
         for (var i = 0; i < list_array.length; i++) {
             var col = $('<div class="col-'+column_width+'"></div>');
-            col.append(button(list_array[i].Form_x0020_Link.Url, list_array[i].Title));
+            col.append(button(list_array[i].Form_x0020_Link.Url, list_array[i].Title, list_array[i].PublicLink.Url));
             row.append(col);
         }
         return row;
     };
 
-    function button(href, text) {
-        return $('<a class="jg_bs btn btn-default btn-warning" href="'+href+'">'+text+'</a>');
+    function button(href, text, public) {
+        return $('<span class="pl_primarysecondarybuttons"><a class="jg_bs btn btn-default btn-warning pl_buttonprimary" href="'+href+'">'+text+'</a><a title="Copy link to public form" class="jg_bs btn btn-default btn-warning pl_buttonsecondary" onclick="FrankRiskForms.copytoclipboard(this, \''+public+'\')"><i class="fa-regular fa-copy"></i></a></span>');
     }
+
+    methods.copytoclipboard = function(element, link) {
+        navigator.clipboard.writeText(link);
+        console.log(link);
+        console.log(element);
+        if (element !== null && link !== null) {
+            var primaryButton = $(element).parent().find('.pl_buttonprimary');
+            if (primaryButton.length > 0) {
+                var originaltext = primaryButton.text();
+                primaryButton.text("Public URL copied to Clipboard");
+                setTimeout(function() {
+                    primaryButton.text(originaltext)
+                }, 1500);
+            }
+        }
+    }
+    
 
     function WaitForCognito(callback) {
         if (typeof Cognito !== "undefined") {
