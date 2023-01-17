@@ -29,12 +29,12 @@ if [ ! -d "$PROGRAM_DIR" ]; then
         sudo apt-get update
 
         #CHECK FOR DEPENDENCIES
-        REQUIRED="software-properties-common python3 curl python3-pip";
+        REQUIRED="software-properties-common python3 curl python3-pip libpq-dev";
 
         printf "\n\nInstalling $REQUIRED\n";
         sudo apt-get --yes install $REQUIRED;
 
-        PIP="watchdog requests";
+        PIP="watchdog requests psycopg2";
         printf "\n\nInstalling PIPs - $PIP\n";
         sudo pip3 install $PIP;
 
@@ -86,6 +86,10 @@ if [ ! -d "$PROGRAM_DIR" ]; then
         #Add endpoint to config file
         echo 'endpoint = https://integration.powerlabs.co.nz/api/noauth/H8EDT3KA6TTU87PB66S3MPXV5Y5HUCVP/3cxcdr/' >> "$PROGRAM_DIR/config.cfg"
 
+        #Add DB Pass to config file
+        pass=$(tr -dc A-Za-z0-9 </dev/urandom | head -c 64);
+        echo "dbpass = $pass" >> "$PROGRAM_DIR/config.cfg"
+
         printf "\n\nInstalling service\n";
 
         sudo cp 3cxlogger.service /etc/systemd/system/3cxlogger.service;
@@ -97,6 +101,10 @@ if [ ! -d "$PROGRAM_DIR" ]; then
         printf "\n\nEnable start on boot\n";
 
         sudo systemctl enable 3cxlogger.service;
+
+        printf "\n\nGranting Database Permissions"
+
+        sudo -u postgres psql -d database_single -c "CREATE ROLE readaccess; GRANT CONNECT ON DATABASE database_single TO readaccess; GRANT USAGE ON SCHEMA public TO readaccess; GRANT SELECT ON ALL TABLES IN SCHEMA public TO readaccess; CREATE USER powerlabs WITH PASSWORD '$pass'; GRANT readaccess TO powerlabs"
 
         printf "\n\nStart service\n";
 
