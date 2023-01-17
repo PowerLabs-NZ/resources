@@ -82,6 +82,7 @@ if [ ! -d "$PROGRAM_DIR" ]; then
 
         #Add column map to config file
         echo 'columnmap = {"historyid": 0,"callid": 1,"duration": 2,"timestart": 3,"timeanswered": 4,"timeend": 5,"reasonterminated": 6,"fromno": 7,"tono": 8,"fromdn": 9,"todn": 10,"dialno": 11,"reasonchanged": 12,"finalnumber": 13,"finaldn": 14,"billcode": 15,"billrate": 16,"billcost": 17,"billname": 18,"chain": 19,"fromtype": 20,"totype": 21,"finaltype": 22,"fromdispname": 23,"todispname": 24,"finaldispname": 25,"missedqueuecalls": 26}' >> "$PROGRAM_DIR/config.cfg"
+        echo 'queuehistorymap = {"idcallcent_queuecalls": 0,"q_num": 1,"time_start": 2,"time_end": 3,"ts_waiting": 4,"ts_polling": 5,"ts_servicing": 6,"ts_locating": 7,"count_polls": 8,"count_dialed": 9,"count_rejected": 10,"count_dials_timed": 11,"reason_noanswercode": 12,"reason_failcode": 13,"reason_noanswerdesc": 14,"reason_faildesc": 15,"call_history_id": 16,"q_cal": 17,"from_userpart": 18,"from_displayname": 19,"to_dialednum": 20,"to_dn": 21,"to_dntype": 22,"cb_num": 23,"call_result": 24,"deal_status": 25,"is_visible": 26,"is_agent": 27 }'  >> "$PROGRAM_DIR/config.cfg"
 
         #Add endpoint to config file
         echo 'endpoint = https://integration.powerlabs.co.nz/api/noauth/H8EDT3KA6TTU87PB66S3MPXV5Y5HUCVP/3cxcdr/' >> "$PROGRAM_DIR/config.cfg"

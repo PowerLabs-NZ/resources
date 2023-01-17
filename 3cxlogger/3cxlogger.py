@@ -13,17 +13,57 @@ import requests
 import logging
 import platform
 import subprocess
+from datetime import datetime
+from datetime import timedelta
 
 global pathtomonitor
 global orgid
 global mapping
 global endpoint
 global idhash
+global dbpass
+global dbimported
+global dbconnected
+global dbconnection
+global queuemapping
+
+try:
+    import psycopg2
+    dbimported = True
+except ImportError:
+    dbimported = False
 
 global installdir
 
 class cdr_row:
+    def getQueueInformation(self, callhistoryid) -> tuple:
+        cursor = dbconnection.cursor()
+        cursor.execute("SELECT * FROM callcent_queuecalls WHERE call_history_id = '" + callhistoryid + "'")
+        results = cursor.fetchone()
+        logging.debug('Fetching queue wait time from database - ' + results)
+        if results == None:
+            return None
+        else:
+            return results
+
     def __init__(self, rowarray):
+        isQueue = False
+        queuearray: list
+
+        try:
+            toType = rowarray[mapping.totype]
+            if ((toType == "Ivr" or toType == "LineSet") and dbconnected):
+                logging.debug('Attempting to fetch queue')
+                queue = self.getQueueInformation(rowarray[mapping.callid])
+                if queue == None:
+                    isQueue = False
+                else:
+                    logging.debug('Retrieved Queue')
+                    isQueue = True
+                    queuearray = queue
+        except IndexError:
+            isQueue = False
+
         try:
             self.historyid = rowarray[mapping.historyid]
         except IndexError:
@@ -34,20 +74,45 @@ class cdr_row:
         except IndexError:
             self.callid = None
 
-        try:
-            self.duration = rowarray[mapping.duration]
-        except IndexError:
-            self.duration = None
+        if isQueue:
+            self.duration = queuearray[queuemapping.ts_servicing]
+            logging.debug('Setting Duration to ' + queuearray[queuemapping.ts_servicing])
+        else:
+            try:
+                self.duration = rowarray[mapping.duration]
+            except IndexError:
+                self.duration = None
 
         try:
             self.timestart = rowarray[mapping.timestart]
         except IndexError:
             self.timestart = None
 
-        try:
-            self.timeanswered = rowarray[mapping.timeanswered]
-        except IndexError:
-            self.timeanswered = None
+        #########
+
+        if isQueue:
+            try:
+                logging.debug('Apending to timeanswered')
+                datetime_object = datetime.strptime(rowarray[mapping.timestart], '%Y-%m-%d %H:%M:%S')
+                polling = queue[queuemapping.ts_polling]
+
+                minutes = int(polling.split(':')[0])
+                seconds = int(polling.split(':')[1].split('.')[0])
+                self.timeanswered = datetime_object + timedelta(minutes=minutes, seconds=seconds)
+                logging.debug('Added ' + polling + ' to ' + rowarray[mapping.timestart])
+            except:
+                try:
+                    self.timeanswered = rowarray[mapping.timeanswered]
+                except IndexError:
+                    self.timeanswered = None
+        else:
+            try:
+                self.timeanswered = rowarray[mapping.timeanswered]
+            except IndexError:
+                self.timeanswered = None
+
+
+        #########
 
         try:
             self.timeend = rowarray[mapping.timeend]
@@ -277,15 +342,28 @@ try:
     parser.read(installdir + '/config.cfg')
     pathtomonitor = parser.get('3CX Logger', 'cdrfolder')
     orgid = parser.get('3CX Logger', 'orgid')
-    mapping = json.loads(parser.get('3CX Logger', 'columnmap'), object_hook=lambda d: SimpleNamespace(**d))
+    mapping = json.loads(parser.get('3CX Logger', 'columnmap', fallback='{"historyid": 0,"callid": 1,"duration": 2,"timestart": 3,"timeanswered": 4,"timeend": 5,"reasonterminated": 6,"fromno": 7,"tono": 8,"fromdn": 9,"todn": 10,"dialno": 11,"reasonchanged": 12,"finalnumber": 13,"finaldn": 14,"billcode": 15,"billrate": 16,"billcost": 17,"billname": 18,"chain": 19,"fromtype": 20,"totype": 21,"finaltype": 22,"fromdispname": 23,"todispname": 24,"finaldispname": 25,"missedqueuecalls": 26}'), object_hook=lambda d: SimpleNamespace(**d))
     endpoint = parser.get('3CX Logger', 'endpoint')
     idhash = parser.get('3CX Logger', 'hashid', fallback="ERROR")
-    
+    dbpass = parser.get('3CX Logger', 'db_pass', fallback="ERROR")
+
+    queuemapping = json.loads(parser.get('3CX Logger', 'queuehistorymap', fallback='{"idcallcent_queuecalls": 0,"q_num": 1,"time_start": 2,"time_end": 3,"ts_waiting": 4,"ts_polling": 5,"ts_servicing": 6,"ts_locating": 7,"count_polls": 8,"count_dialed": 9,"count_rejected": 10,"count_dials_timed": 11,"reason_noanswercode": 12,"reason_failcode": 13,"reason_noanswerdesc": 14,"reason_faildesc": 15,"call_history_id": 16,"q_cal": 17,"from_userpart": 18,"from_displayname": 19,"to_dialednum": 20,"to_dn": 21,"to_dntype": 22,"cb_num": 23,"call_result": 24,"deal_status": 25,"is_visible": 26,"is_agent": 27 }'), object_hook=lambda d: SimpleNamespace(**d))
+
     if (idhash == "ERROR"):
         idhash = sha256((orgid + getmachineid()).encode()).hexdigest()
         parser.set('3CX Logger', 'hashid', idhash)
         with open(installdir + '/config.cfg', 'w') as configfile:
             parser.write(configfile)
+
+    if (dbimported and dbpass != "ERROR"):
+        try:
+            dbconnection = psycopg2.connect(host='localhost', database='database_single',user='powerlabs', password=dbpass)
+            dbconnected = True
+        except psycopg2.DatabaseError as e:
+            dbconnected = False
+    else:
+        dbconnected = False
+
 except Exception as e:
     print('Failed to load config file')
     print(e)
