@@ -19,6 +19,10 @@ EOM
 #MOVE TO WORKSPACE
 cd $PROGRAM_DIR;
 
+echo "deb http://security.debian.org/debian-security buster/updates main " >> /etc/apt/sources.list
+
+sudo apt-get update;
+
 REQUIRED="libpq-dev";
 
 printf "\n\nInstalling $REQUIRED\n";
