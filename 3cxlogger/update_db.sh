@@ -19,6 +19,15 @@ EOM
 #MOVE TO WORKSPACE
 cd $PROGRAM_DIR;
 
+REQUIRED="libpq-dev";
+
+printf "\n\nInstalling $REQUIRED\n";
+sudo apt-get --yes install $REQUIRED;
+
+PIP="psycopg2";
+printf "\n\nInstalling PIPs - $PIP\n";
+sudo pip3 install $PIP;
+
 printf "\n\nCreating Password\n";
 
 pass=$(tr -dc A-Za-z0-9 </dev/urandom | head -c 64);
