@@ -26,43 +26,78 @@ global dbimported
 global dbconnected
 global dbconnection
 global queuemapping
+printDebugLines = False
 
 try:
     import psycopg2
     dbimported = True
+    logging.debug('Imported psycopg2')
+    if(printDebugLines):
+        print('Imported psycopg2')
 except ImportError:
     dbimported = False
+    logging.error('Failed to import psycopg2')
+    if(printDebugLines):
+        print('Failed to import psycopg2')
 
 global installdir
 
 class cdr_row:
-    def getQueueInformation(self, callhistoryid) -> tuple:
+    def getQueueInformation(self, callhistoryid: str) -> tuple:
+        logging.debug('Fetching queue wait time from database')
+        if(printDebugLines):
+            print('Fetching queue wait time from database from callhistoryid:')
+            print(callhistoryid)
         cursor = dbconnection.cursor()
-        cursor.execute("SELECT * FROM callcent_queuecalls WHERE call_history_id = '" + callhistoryid + "'")
+        query: str = "SELECT * FROM callcent_queuecalls WHERE call_history_id = '" + callhistoryid + "'"
+        logging.debug('Using Query ' + query)
+        if(printDebugLines):
+            print('Using Query')
+            print(query)
+        cursor.execute(query)
         results = cursor.fetchone()
-        logging.debug('Fetching queue wait time from database - ' + results)
-        if results == None:
-            return None
-        else:
-            return results
+        logging.debug('Results')
+        logging.debug(results)
+        if(printDebugLines):
+            print('Results:')
+            print(results)
+        return results
 
     def __init__(self, rowarray):
+        logging.debug('Parsing Row')
+        if(printDebugLines):
+            print('Parsing Row')
         isQueue = False
-        queuearray: list
+        queuearray: tuple
 
         try:
             toType = rowarray[mapping.totype]
+            logging.debug('Checking toType ' + toType)
+            logging.debug('Database Status - Connected:' + str(dbconnected))
+            if(printDebugLines):
+                print('Checking toType ' + toType)
+                print('Database Status - Connected:' + str(dbconnected))
             if ((toType == "Ivr" or toType == "LineSet") and dbconnected):
                 logging.debug('Attempting to fetch queue')
-                queue = self.getQueueInformation(rowarray[mapping.callid])
+                if(printDebugLines):
+                    print('Attempting to fetch queue')
+                queue = self.getQueueInformation(str(rowarray[mapping.callid]))
                 if queue == None:
                     isQueue = False
+                    logging.debug('Queue Line didnt exist')
+                    if(printDebugLines):
+                        print('Queue Line didnt exist')
                 else:
                     logging.debug('Retrieved Queue')
+                    if(printDebugLines):
+                        print('Retrieved Queue')
                     isQueue = True
                     queuearray = queue
         except IndexError:
             isQueue = False
+            logging.debug('Failed to get totype')
+            if(printDebugLines):
+                    print('Failed to get totype')
 
         try:
             self.historyid = rowarray[mapping.historyid]
@@ -75,8 +110,10 @@ class cdr_row:
             self.callid = None
 
         if isQueue:
-            self.duration = queuearray[queuemapping.ts_servicing]
-            logging.debug('Setting Duration to ' + queuearray[queuemapping.ts_servicing])
+            self.duration = str(queuearray[queuemapping.ts_servicing])
+            logging.debug('Setting Duration to ' + str(queuearray[queuemapping.ts_servicing]))
+            if(printDebugLines):
+                print('Setting Duration to ' + str(queuearray[queuemapping.ts_servicing]))
         else:
             try:
                 self.duration = rowarray[mapping.duration]
@@ -93,13 +130,22 @@ class cdr_row:
         if isQueue:
             try:
                 logging.debug('Apending to timeanswered')
-                datetime_object = datetime.strptime(rowarray[mapping.timestart], '%Y-%m-%d %H:%M:%S')
-                polling = queue[queuemapping.ts_polling]
+                if(printDebugLines):
+                    print('Apending to timeanswered')
 
-                minutes = int(polling.split(':')[0])
-                seconds = int(polling.split(':')[1].split('.')[0])
-                self.timeanswered = datetime_object + timedelta(minutes=minutes, seconds=seconds)
-                logging.debug('Added ' + polling + ' to ' + rowarray[mapping.timestart])
+                
+                if (str(queuearray[queuemapping.ts_servicing]) != "0:00:00"):
+                    datetime_object = datetime.strptime(rowarray[mapping.timestart], '%Y-%m-%d %H:%M:%S')
+                    polling = str(queuearray[queuemapping.ts_polling])
+
+                    minutes = int(polling.split(':')[0])
+                    seconds = int(polling.split(':')[1].split('.')[0])
+                    self.timeanswered = datetime_object + timedelta(minutes=minutes, seconds=seconds)
+                    logging.debug('Added ' + polling + ' to ' + rowarray[mapping.timestart])
+                    if(printDebugLines):
+                        print('Added ' + polling + ' to ' + rowarray[mapping.timestart])
+                else:
+                    self.timeanswered = None
             except:
                 try:
                     self.timeanswered = rowarray[mapping.timeanswered]
@@ -259,6 +305,8 @@ def process_csv(filepath, isFileDir = False):
             else:
                 logging.error("Failed to get status with status code" + str(response.status_code))
         logging.debug('Attempting to parse ' + filepath)
+        if(printDebugLines):
+            print('Attempting to parse ' + filepath)
         lines = []
         response_pass = True
         with open(filepath, 'r') as file:
@@ -268,21 +316,31 @@ def process_csv(filepath, isFileDir = False):
                     formatedrow = cdr_row(row)
                     lines.append(formatedrow)
                     logging.debug('Adding line to array: ' + json.dumps(formatedrow.__dict__))
+                    if(printDebugLines):
+                        print('Adding line to array: ' + json.dumps(formatedrow.__dict__))
         file.close()
         for line in lines:
             logging.debug('Sending lines to integration server')
+            if(printDebugLines):
+                print('Sending lines to integration server')
             uploaded = False
             while uploaded == False:
                 response = requests.post(endpoint+orgid, json.dumps(line.__dict__), headers=headers)
                 if (response.status_code == 429):
                     logging.debug(str(response.status_code) + " - Waiting for throttle")
+                    if(printDebugLines):
+                        print(str(response.status_code) + " - Waiting for throttle")
                     time.sleep(60)
                 elif (response.status_code == 201 or response.status_code == 409):
                     uploaded = True
                     if (response.status_code == 201):
                         logging.debug(str(response.status_code) + " - Uploaded")
+                        if(printDebugLines):
+                            print(str(response.status_code) + " - Uploaded")
                     elif (response.status_code == 409):
                         logging.debug(str(response.status_code) + " - Duplicate")
+                        if(printDebugLines):
+                            print(str(response.status_code) + " - Duplicate")
                 elif (response.status_code == 401):
                     logging.error("Server unauthroised - Waiting for admin approval")
                     time.sleep(60)
@@ -291,13 +349,19 @@ def process_csv(filepath, isFileDir = False):
                     sys.exit(2)
                 elif (response.status_code != 201 and response.status_code != 409):
                     logging.debug('Failed to uploaded line with status code ' + str(response.status_code))
+                    if(printDebugLines):
+                        print('Failed to uploaded line with status code ' + str(response.status_code))
                     response_pass = False
 
         if response_pass:
             logging.debug('Attempting to delete file')
+            if(printDebugLines):
+                print('Attempting to delete file')
             for attempt in range(10):
                 try:
                     logging.debug("Deleting " + filepath)
+                    if(printDebugLines):
+                        print("Deleting " + filepath)
                     os.remove(filepath)
                 except Exception as e:
                     print("Cannot Delete file")
@@ -323,6 +387,9 @@ def process_csv(filepath, isFileDir = False):
             fin = open(filepath, "wt")
             fin.write(data)
             fin.close()
+        exc_type, exc_obj, exc_tb = sys.exc_info()
+        fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
+        print(exc_type, fname, exc_tb.tb_lineno)
 
 
 def on_created(event):
@@ -338,6 +405,7 @@ def parseexisting():
 try:
     installdir = "/usr/bin/powerlabs_3cxlogger/"
     logging.basicConfig(filename=installdir + '/debug.log', level=logging.ERROR)
+    printDebugLines = False
     parser = configparser.RawConfigParser()
     parser.read(installdir + '/config.cfg')
     pathtomonitor = parser.get('3CX Logger', 'cdrfolder')
@@ -345,7 +413,7 @@ try:
     mapping = json.loads(parser.get('3CX Logger', 'columnmap', fallback='{"historyid": 0,"callid": 1,"duration": 2,"timestart": 3,"timeanswered": 4,"timeend": 5,"reasonterminated": 6,"fromno": 7,"tono": 8,"fromdn": 9,"todn": 10,"dialno": 11,"reasonchanged": 12,"finalnumber": 13,"finaldn": 14,"billcode": 15,"billrate": 16,"billcost": 17,"billname": 18,"chain": 19,"fromtype": 20,"totype": 21,"finaltype": 22,"fromdispname": 23,"todispname": 24,"finaldispname": 25,"missedqueuecalls": 26}'), object_hook=lambda d: SimpleNamespace(**d))
     endpoint = parser.get('3CX Logger', 'endpoint')
     idhash = parser.get('3CX Logger', 'hashid', fallback="ERROR")
-    dbpass = parser.get('3CX Logger', 'db_pass', fallback="ERROR")
+    dbpass = parser.get('3CX Logger', 'dbpass', fallback="ERROR")
 
     queuemapping = json.loads(parser.get('3CX Logger', 'queuehistorymap', fallback='{"idcallcent_queuecalls": 0,"q_num": 1,"time_start": 2,"time_end": 3,"ts_waiting": 4,"ts_polling": 5,"ts_servicing": 6,"ts_locating": 7,"count_polls": 8,"count_dialed": 9,"count_rejected": 10,"count_dials_timed": 11,"reason_noanswercode": 12,"reason_failcode": 13,"reason_noanswerdesc": 14,"reason_faildesc": 15,"call_history_id": 16,"q_cal": 17,"from_userpart": 18,"from_displayname": 19,"to_dialednum": 20,"to_dn": 21,"to_dntype": 22,"cb_num": 23,"call_result": 24,"deal_status": 25,"is_visible": 26,"is_agent": 27 }'), object_hook=lambda d: SimpleNamespace(**d))
 
@@ -355,14 +423,29 @@ try:
         with open(installdir + '/config.cfg', 'w') as configfile:
             parser.write(configfile)
 
+    logging.debug('DBImported:' + str(dbimported))
+    logging.debug('DBPass:' + dbpass)
+    if(printDebugLines):
+        print('DBImported:' + str(dbimported))
+        print('DBPass:' + dbpass)
+
     if (dbimported and dbpass != "ERROR"):
         try:
             dbconnection = psycopg2.connect(host='localhost', database='database_single',user='powerlabs', password=dbpass)
             dbconnected = True
+            logging.debug('Connected to Database')
+            if(printDebugLines):
+                print('Connected to Database')
         except psycopg2.DatabaseError as e:
             dbconnected = False
+            logging.debug('Failed to connect to Database')
+            if(printDebugLines):
+                print('Failed to connect to Database')
     else:
         dbconnected = False
+        logging.debug('Couldnt connect to Database')
+        if(printDebugLines):
+            print('Couldnt connect to Database')
 
 except Exception as e:
     print('Failed to load config file')
