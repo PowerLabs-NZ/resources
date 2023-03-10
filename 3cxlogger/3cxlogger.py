@@ -405,7 +405,7 @@ def parseexisting():
 try:
     installdir = "/usr/bin/powerlabs_3cxlogger/"
     logging.basicConfig(filename=installdir + '/debug.log', level=logging.ERROR)
-    printDebugLines = False
+    printDebugLines = True
     parser = configparser.RawConfigParser()
     parser.read(installdir + '/config.cfg')
     pathtomonitor = parser.get('3CX Logger', 'cdrfolder')
