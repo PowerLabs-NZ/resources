@@ -77,7 +77,7 @@ class cdr_row:
             if(printDebugLines):
                 print('Checking toType ' + toType)
                 print('Database Status - Connected:' + str(dbconnected))
-            if ((toType == "Ivr" or toType == "LineSet") and dbconnected):
+            if ((toType == "Ivr" or toType == "LineSet" or toType == "Queue") and dbconnected):
                 logging.debug('Attempting to fetch queue')
                 if(printDebugLines):
                     print('Attempting to fetch queue')
