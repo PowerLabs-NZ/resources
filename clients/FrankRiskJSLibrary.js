@@ -1,69 +1,11 @@
-/* INSTALL CODE
-<script>
-    if (typeof FrankRiskForms == 'undefined') {
-        var script = document.createElement("script");
-        var version = new Date().getTime();
-        script.src = "https://cdn.jsdelivr.net/gh/JG-Software-Solutions/javascript_libraries@release/FrankRiskJSLibrary.js?v="+version;
-        document.getElementsByTagName('head')[0].appendChild(script);
-    }    
-
-    WaitForLibrary(function() {
-        //Run Functions
-    });
-    
-    function WaitForLibrary(callback) {
-        if (typeof FrankRiskForms !== "undefined" && typeof $ !== "undefined") {
-            callback();
-        } else {
-            setTimeout(function() {
-            WaitForLibrary(callback);
-            }, 100);
-        }
-    };
-</script>
-*/
-
 var FrankRiskForms = (function() {
     var methods = {};
     var version = new Date().getTime();
-
     var load = true;
-    
     if (window.location.search.includes("noload", 0) === true) {
         load = false;
     }
-    
     if (load) {
-        var jquery = document.createElement("script");
-        jquery.src = "https://cdn.jsdelivr.net/gh/PowerLabs-NZ/resources@release/global/jquery-3.6.0.js?v="+version;
-        document.getElementsByTagName('head')[0].appendChild(jquery);
-
-        var bootstrapjs = document.createElement("script");
-        bootstrapjs.src = "https://cdn.jsdelivr.net/gh/PowerLabs-NZ/resources@release/global/jg_bootstrap.bundle.js?v="+version;
-        document.getElementsByTagName('head')[0].appendChild(bootstrapjs);
-
-        var bootstrapcss = document.createElement("link");
-        bootstrapcss.rel = "stylesheet";
-        bootstrapcss.href = "https://cdn.jsdelivr.net/gh/PowerLabs-NZ/resources@release/global/jg_bootstrap.css?v="+version;
-        bootstrapcss.crossorigin = "anonymous";
-        bootstrapcss.setAttribute("type", "text/css");
-        document.getElementsByTagName('head')[0].appendChild(bootstrapcss);
-
-        var fontawesome = document.createElement("link");
-        fontawesome.rel = "stylesheet";
-        fontawesome.href = "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.1/css/all.min.css";
-        fontawesome.crossorigin = "anonymous";
-        fontawesome.setAttribute("type", "text/css");
-        document.getElementsByTagName('head')[0].appendChild(fontawesome);
-
-        var customcss = document.createElement("link");
-        customcss.rel = "stylesheet";
-        customcss.href = "https://cdn.jsdelivr.net/gh/PowerLabs-NZ/resources@release/clients/FrankRisk.css?v="+version;
-        customcss.crossorigin = "anonymous";
-        customcss.setAttribute("type", "text/css");
-        document.getElementsByTagName('head')[0].appendChild(customcss);
-        
-
         /*<script>
         if (typeof FrankRiskForms != 'undefined') {
             FrankRiskForms.loadSPForm('75474567457', 1, '#form1', 'https://www.frankrisk.co.nz/liability-renewal-declaration');
@@ -316,34 +258,31 @@ var FrankRiskForms = (function() {
             });
         };
 
-        methods.buildListPage = function (site_url, element_id, list_guid, column_width = 4) {
-            $.ajax({
-                headers: {
-                    "Accept": "application/json",
-                    "Content-Type": "application/json"
-                },
-                url: site_url + "/_api/web/lists(guid'"+list_guid+"')/items?$orderby=Title asc",
-                method: "GET",
-                success: function (data) {
-                    data = data.value;
-                    $('.mainContent .SPCanvas #' + element_id).append(buildBootstrapGridFromSharePointList(data, column_width));
-                }
-            });
+        methods.buildListPage = function (element, column_width = 4) {
+            element = $(element);
+            const forms = JSON.parse('[{"title":"Liability Renewal Declaration","id":1,"link":"liability-renewal-declaration"},{"title":"Fire and Emergency Levy","id":2,"link":"fire-and-emergency-levy"},{"title":"Vehicle List","id":4,"link":"vehicle-list"},{"title":"Gross Rents Declaration","id":7,"link":"gross-rents-client-declaration"},{"title":"SME Proposal","id":3,"link":"sme-proposal"},{"title":"Marine Cargo Declaration","id":8,"link":"marine-cargo-declaration"},{"title":"Annual Contract Works Declaration","id":9,"link":"annual-contract-works-declaration"},{"title":"Carrier Liability Declaration","id":10,"link":"carriers-liability-declaration"},{"title":"Management Liability Proposal","id":5,"link":"management-liability-proposal"},{"title":"Frankie Management & Cyber Liability Proposal form","id":11,"link":"https://www.cognitoforms.com/FrankRiskManagement/CyberManagementLiabilityInsuranceProposal"},{"title":"Management Liability Declaration","id":12,"link":"management-liability-declaration"},{"title":"Allianz Travel Declaration","id":15,"link":"allianz-travel-declaration"},{"title":"Contract Works Extension Questionnaire","id":13,"link":"contract-works-extension-questionnaire"},{"title":"Investment Manager Insurance","id":16,"link":"investment-manager-insurance"},{"title":"Public Liability Claim Form","id":14,"link":"public-liability-claim-form"},{"title":"TMGCloudland Cyber Liability Questions","id":18,"link":"https://www.cognitoforms.com/FrankRiskManagement/TMGCloudlandCyberLiabilityQuestions"}]');
+            element.append(buildBootstrapGrid(forms, column_width));
         };
 
-        function buildBootstrapGridFromSharePointList(list_array, column_width) {
+        function buildBootstrapGrid(list_array, column_width) {
             var row = $('<div class="btn-width-100 jg_bs row g-5 mx-5 text-center"></div>');
-            for (var i = 0; i < list_array.length; i++) {
-                var col = $('<div class="col-'+column_width+'"></div>');
-                col.append(button(list_array[i].Form_x0020_Link.Url, list_array[i].Title, list_array[i].PublicLink.Url));
+            list_array.forEach((form) => {
+                let col = $(`<div class="col-${column_width}"></div>`);
+                let button_container = $(`<span class="pl_primarysecondarybuttons">
+                    <a class="jg_bs btn btn-default btn-warning pl_buttonprimary">${form.title}</a>
+                    <a title="Copy link to public form" class="jg_bs btn btn-default btn-warning pl_buttonsecondary" onclick="FrankRiskForms.copytoclipboard(this, '${form.link.startsWith('https')? form.link : 'https://www.frankrisk.co.nz/' + form.link}')">
+                        <i class="fa-regular fa-copy"></i>
+                    </a>
+                </span>`)
+                let primaryButton = button_container.find('.pl_buttonprimary');
+                primaryButton.on('click', (event) => {
+                    console.log('Clicked on' + form.title);
+                });
+                col.append(button_container);
                 row.append(col);
-            }
+            });
             return row;
         };
-
-        function button(href, text, public) {
-            return $('<span class="pl_primarysecondarybuttons"><a class="jg_bs btn btn-default btn-warning pl_buttonprimary" href="'+href+'">'+text+'</a><a title="Copy link to public form" class="jg_bs btn btn-default btn-warning pl_buttonsecondary" onclick="FrankRiskForms.copytoclipboard(this, \''+public+'\')"><i class="fa-regular fa-copy"></i></a></span>');
-        }
 
         methods.copytoclipboard = function(element, link) {
             navigator.clipboard.writeText(link);
@@ -360,7 +299,6 @@ var FrankRiskForms = (function() {
                 }
             }
         }
-        
 
         function WaitForCognito(callback) {
             if (typeof Cognito !== "undefined") {
